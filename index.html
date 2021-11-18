@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Example for browser native date, time and number formatting</title>
+    <style>
+      table,
+      th,
+      td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        padding: 8px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Date format</h1>
+    <table id="date-format">
+      <thead>
+        <tr>
+          <th>Locale</th>
+          <th>Full</th>
+          <th>Long</th>
+          <th>Medium</th>
+          <th>Short</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <h1>Time format</h1>
+    <table id="time-format">
+      <thead>
+        <tr>
+          <th>Locale</th>
+          <th>Long</th>
+          <th>Medium</th>
+          <th>Short</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <h1>Number format</h1>
+    <table id="number-format">
+      <thead>
+        <tr>
+          <th>Locale</th>
+          <th>Decimal</th>
+          <th>Integer</th>
+          <th>CHF</th>
+          <th>EUR</th>
+          <th>GBP</th>
+          <th>HDK</th>
+          <th>SGD</th>
+          <th>Percent</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </body>
+  <script>
+    (function () {
+      const date = new Date(Date.UTC(2020, 11, 20, 3, 23, 16, 738));
+      const locales = [
+        "de-CH",
+        "en-CH",
+        "fr-CH",
+        "it-CH",
+        "de-DE",
+        "en-DE",
+        "en-HK",
+        "en-SG",
+        "zh-Hans-HK",
+        "zh-Hans-SG",
+        "zh-Hant-HK",
+        "zh-Hant-SG",
+      ];
+      const dateStyles = ["full", "long", "medium", "short"];
+      const timeStyles = ["long", "medium", "short"];
+      const currencies = ["CHF", "EUR", "GBP", "HDK", "SGD"];
+      const numberStyles = [
+        { value: 123456789.4567, style: "decimal" },
+        { value: 123456789, style: "decimal" },
+        ...currencies.map((currency) => ({
+          value: 123456789.46,
+          style: "currency",
+          currency,
+          currencyDisplay: "code",
+        })),
+        { value: 0.045, style: "percent", minimumFractionDigits: 1 },
+      ];
+      const dateFormat = document.querySelector("#date-format tbody");
+      const timeFormat = document.querySelector("#time-format tbody");
+      const numberFormat = document.querySelector("#number-format tbody");
+
+      function renderDateFormat() {
+        locales.forEach((locale) => {
+          const row = document.createElement("tr");
+          const localeCell = document.createElement("td");
+          localeCell.innerText = locale;
+          row.appendChild(localeCell);
+
+          dateStyles.forEach((dateStyle) => {
+            const cell = document.createElement("td");
+            cell.innerText = new Intl.DateTimeFormat(locale, {
+              dateStyle,
+            }).format(date);
+            row.appendChild(cell);
+          });
+
+          dateFormat.appendChild(row);
+        });
+      }
+
+      function renderTimeFormat() {
+        locales.forEach((locale) => {
+          const row = document.createElement("tr");
+          const localeCell = document.createElement("td");
+          localeCell.innerText = locale;
+          row.appendChild(localeCell);
+
+          timeStyles.forEach((timeStyle) => {
+            const cell = document.createElement("td");
+            cell.innerText = new Intl.DateTimeFormat(locale, {
+              timeStyle,
+            }).format(date);
+            row.appendChild(cell);
+          });
+
+          timeFormat.appendChild(row);
+        });
+      }
+
+      function renderNumberFormat() {
+        locales.forEach((locale) => {
+          const row = document.createElement("tr");
+          const localeCell = document.createElement("td");
+          localeCell.innerText = locale;
+          row.appendChild(localeCell);
+
+          numberStyles.forEach(
+            ({
+              value,
+              style,
+              currency,
+              minimumFractionDigits,
+              currencyDisplay,
+            }) => {
+              const cell = document.createElement("td");
+              cell.innerText = new Intl.NumberFormat(locale, {
+                style,
+                currency,
+                currencyDisplay,
+                minimumFractionDigits,
+              }).format(value);
+              row.appendChild(cell);
+            }
+          );
+
+          numberFormat.appendChild(row);
+        });
+      }
+
+      renderDateFormat();
+      renderTimeFormat();
+      renderNumberFormat();
+    })();
+  </script>
+</html>
