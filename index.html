@@ -13,10 +13,14 @@
         border-collapse: collapse;
         padding: 8px 12px;
       }
+      button {
+        float: right;
+      }
     </style>
   </head>
   <body>
     <h1>Date format</h1>
+    <button type="button" id="submit">Submit</button>
     <table id="date-format">
       <thead>
         <tr>
@@ -101,6 +105,7 @@
       const dateFormat = document.querySelector("#date-format tbody");
       const timeFormat = document.querySelector("#time-format tbody");
       const numberFormat = document.querySelector("#number-format tbody");
+      const submitButton = document.querySelector("#submit");
 
       function renderDateFormat() {
         locales.forEach((locale) => {
@@ -169,6 +174,39 @@
           numberFormat.appendChild(row);
         });
       }
+
+      function tableToJson(table, format) {
+        const types = [...table.querySelectorAll("thead th")]
+          .map((head) => head.innerText)
+          .slice(1);
+        const locales = [...table.querySelectorAll("tbody tr")].map(
+          (row) => row.querySelector("td").innerText
+        );
+        const formats = [];
+        locales.forEach((locale, i) => {
+          types.forEach((type, j) => {
+            const value = table.querySelector(
+              `tbody tr:nth-child(${i + 1}) td:nth-child(${j + 2})`
+            ).innerText;
+            formats.push({
+              format,
+              locale,
+              type,
+              value,
+            });
+          });
+        });
+        return formats;
+      }
+
+      submitButton.addEventListener("click", () => {
+        const formats = [
+          ...tableToJson(dateFormat.parentElement, "date"),
+          ...tableToJson(timeFormat.parentElement, "time"),
+          ...tableToJson(numberFormat.parentElement, "number"),
+        ];
+        console.log({ platform: navigator.userAgent });
+      });
 
       renderDateFormat();
       renderTimeFormat();
