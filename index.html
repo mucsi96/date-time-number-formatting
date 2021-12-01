@@ -205,7 +205,17 @@
           ...tableToJson(timeFormat.parentElement, "time"),
           ...tableToJson(numberFormat.parentElement, "number"),
         ];
-        console.log({ platform: navigator.userAgent });
+        fetch("/formats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ platform: navigator.userAgent, formats }),
+        })
+          .then((res) => {
+            if (!res.ok) {
+              throw "Unable to post formats";
+            }
+          })
+          .catch((err) => alert(err));
       });
 
       renderDateFormat();
