@@ -50,9 +50,7 @@
           <th>Integer</th>
           <th>CHF</th>
           <th>EUR</th>
-          <th>GBP</th>
-          <th>HDK</th>
-          <th>SGD</th>
+          <th>USD</th>
           <th>Percent</th>
         </tr>
       </thead>
@@ -63,14 +61,24 @@
     (function () {
       const date = new Date(Date.UTC(2020, 11, 20, 3, 23, 16, 738));
       const locales = [
-        "de-CH",
-        "en-CH",
-        "fr-CH",
-        "it-CH",
+        "de",
         "de-DE",
+        "de-CH",
+        "en",
+        "en-US",
+        "en-GB",
+        "en-CH",
         "en-DE",
         "en-HK",
         "en-SG",
+        "fr",
+        "fr-FR",
+        "fr-CH",
+        "it",
+        "it-IT",
+        "it-CH",
+        "zh-Hans",
+        "zh-Hant",
         "zh-Hans-HK",
         "zh-Hans-SG",
         "zh-Hant-HK",
@@ -78,7 +86,7 @@
       ];
       const dateStyles = ["full", "long", "medium", "short"];
       const timeStyles = ["long", "medium", "short"];
-      const currencies = ["CHF", "EUR", "GBP", "HDK", "SGD"];
+      const currencies = ["CHF", "EUR", "USD"];
       const numberStyles = [
         { value: 123456789.4567, style: "decimal" },
         { value: 123456789, style: "decimal" },
