@@ -15,10 +15,37 @@
       }
 
       #submit,
-      #download {
+      #download,
+      aside {
         float: right;
         clear: both;
         margin: 15px;
+      }
+
+      aside {
+        position: sticky;
+        top: 0;
+      }
+
+      .deviation-0 {
+        background-color: #b2e7b2;
+      }
+
+      .deviation-1 {
+        background-color: #f9ffbd;
+      }
+
+      .deviation-2 {
+        background-color: #ffecbd;
+      }
+
+      .deviation-3,
+      .deviation-4,
+      .deviation-5,
+      .deviation-6,
+      .deviation-7,
+      .deviation-8 {
+        background-color: #ffcbbd;
       }
     </style>
   </head>
@@ -26,6 +53,7 @@
     <h1>Date format</h1>
     <button type="button" id="submit">Submit</button>
     <a id="download">Download</a>
+    <aside></aside>
     <table id="date-format">
       <thead>
         <tr>
@@ -112,6 +140,7 @@
       const numberFormat = document.querySelector("#number-format tbody");
       const submitButton = document.querySelector("#submit");
       const downloadLink = document.querySelector("#download");
+      const sidebar = document.querySelector("aside");
 
       function renderDateFormat() {
         locales.forEach((locale) => {
@@ -143,6 +172,7 @@
             const cell = document.createElement("td");
             cell.innerText = new Intl.DateTimeFormat(locale, {
               timeStyle,
+              timeZone: 'Europe/Berlin'
             }).format(date);
             row.appendChild(cell);
           });
@@ -181,13 +211,21 @@
         });
       }
 
-      function tableToJson(table, format) {
-        const types = [...table.querySelectorAll("thead th")]
+      function getTypes(table) {
+        return [...table.querySelectorAll("thead th")]
           .map((head) => head.innerText)
           .slice(1);
-        const locales = [...table.querySelectorAll("tbody tr")].map(
+      }
+
+      function getLocales(table) {
+        return [...table.querySelectorAll("tbody tr")].map(
           (row) => row.querySelector("td").innerText
         );
+      }
+
+      function tableToJson(table, format) {
+        const types = getTypes(table);
+        const locales = getLocales(table);
         const formats = [];
         locales.forEach((locale, i) => {
           types.forEach((type, j) => {
@@ -205,9 +243,82 @@
         return formats;
       }
 
+      function getFormats(db, format, locale, type) {
+        return Object.fromEntries(
+          Object.entries(db).map(([platform, formats]) => [
+            platform,
+            formats.find(
+              (f) =>
+                f.format === format && f.locale === locale && f.type === type
+            ).value,
+          ])
+        );
+      }
+
+      function getDeviation(db, format, locale, type) {
+        const formats = getFormats(db, format, locale, type);
+        const distribution = Object.values(formats).reduce((acc, format) => {
+          if (acc[format]) {
+            acc[format] = acc[format] + 1;
+          } else {
+            acc[format] = 1;
+          }
+
+          return acc;
+        }, {});
+        const max = Math.max(...Object.values(distribution));
+        const mostUsedFormat = Object.entries(distribution).find(
+          ([format, count]) => count === max
+        )[0];
+        const deviation = Object.entries(distribution).reduce(
+          (acc, [format, count]) => {
+            if (format !== mostUsedFormat) {
+              acc += count;
+            }
+
+            return acc;
+          },
+          0
+        );
+
+        return deviation;
+      }
+
+      async function renderStats(table, format) {
+        const types = getTypes(table);
+        const locales = getLocales(table);
+        const response = await fetch("db.json");
+        const db = await response.json();
+
+        locales.forEach((locale, i) => {
+          types.forEach((type, j) => {
+            const cell = table.querySelector(
+              `tbody tr:nth-child(${i + 1}) td:nth-child(${j + 2})`
+            );
+            const deviation = getDeviation(db, format, locale, type);
+            cell.className = `deviation-${deviation}`;
+            cell.addEventListener("click", () => {
+              const formats = getFormats(db, format, locale, type);
+              const content = `<p>Deviation: ${deviation}</p><table><thead><tr><th>Platform</th><th>Format</th></tr></thead><tbody>${Object.entries(
+                formats
+              )
+                .map(
+                  ([platform, format]) =>
+                    `<tr><td>${platform}</td><td>${format}</td></tr>`
+                )
+                .join("")}</tbody></table>`;
+              sidebar.innerHTML = content;
+            });
+          });
+        });
+      }
+
       renderDateFormat();
       renderTimeFormat();
       renderNumberFormat();
+      renderStats(dateFormat.parentElement, "date");
+      renderStats(timeFormat.parentElement, "time");
+      renderStats(numberFormat.parentElement, "number");
 
       const formats = [
         ...tableToJson(dateFormat.parentElement, "date"),
