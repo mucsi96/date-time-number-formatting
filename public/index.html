@@ -13,14 +13,19 @@
         border-collapse: collapse;
         padding: 8px 12px;
       }
-      button {
+
+      #submit,
+      #download {
         float: right;
+        clear: both;
+        margin: 15px;
       }
     </style>
   </head>
   <body>
     <h1>Date format</h1>
     <button type="button" id="submit">Submit</button>
+    <a id="download">Download</a>
     <table id="date-format">
       <thead>
         <tr>
@@ -106,6 +111,7 @@
       const timeFormat = document.querySelector("#time-format tbody");
       const numberFormat = document.querySelector("#number-format tbody");
       const submitButton = document.querySelector("#submit");
+      const downloadLink = document.querySelector("#download");
 
       function renderDateFormat() {
         locales.forEach((locale) => {
@@ -199,12 +205,17 @@
         return formats;
       }
 
+      renderDateFormat();
+      renderTimeFormat();
+      renderNumberFormat();
+
+      const formats = [
+        ...tableToJson(dateFormat.parentElement, "date"),
+        ...tableToJson(timeFormat.parentElement, "time"),
+        ...tableToJson(numberFormat.parentElement, "number"),
+      ];
+
       submitButton.addEventListener("click", () => {
-        const formats = [
-          ...tableToJson(dateFormat.parentElement, "date"),
-          ...tableToJson(timeFormat.parentElement, "time"),
-          ...tableToJson(numberFormat.parentElement, "number"),
-        ];
         fetch("/formats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -218,9 +229,13 @@
           .catch((err) => alert(err));
       });
 
-      renderDateFormat();
-      renderTimeFormat();
-      renderNumberFormat();
+      downloadLink.setAttribute(
+        "href",
+        `data:text/json;charset=utf-8,${encodeURIComponent(
+          JSON.stringify({ platform: navigator.userAgent, formats })
+        )}`
+      );
+      downloadLink.setAttribute("download", "formats.json");
     })();
   </script>
 </html>
