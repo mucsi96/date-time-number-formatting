@@ -96,7 +96,71 @@
   </body>
   <script>
     (function () {
+      /////////////////////////////////// NATIVE //////////////////////////////////////////////
+      function formatDate({ date, locale, style }) {
+        return new Intl.DateTimeFormat(locale, {
+          dateStyle: style,
+        }).format(date);
+      }
+
+      function formatTime({ date, locale, style }) {
+        return new Intl.DateTimeFormat(locale, {
+          timeStyle: style,
+          timeZone,
+        }).format(date);
+      }
+
+      function formatNumber({
+        value,
+        locale,
+        style,
+        currency,
+        minimumFractionDigits,
+      }) {
+        return new Intl.NumberFormat(locale, {
+          style,
+          currency,
+          currencyDisplay: "code",
+          minimumFractionDigits,
+        }).format(value);
+      }
+      /////////////////////////////////// CUSTOM //////////////////////////////////////////////
+      // function formatDate({ date, locale, style }) {
+      //   if (style === "short") {
+      //     return new Intl.DateTimeFormat("de", {
+      //       dateStyle: "medium",
+      //     }).format(date);
+      //   }
+
+      //   return new Intl.DateTimeFormat(locale, {
+      //     dateStyle: style,
+      //   }).format(date);
+      // }
+
+      // function formatTime({ date, locale, style }) {
+      //   return new Intl.DateTimeFormat(locale, {
+      //     timeStyle: style,
+      //     timeZone,
+      //   }).format(date);
+      // }
+
+      // function formatNumber({
+      //   value,
+      //   locale,
+      //   style,
+      //   currency,
+      //   minimumFractionDigits,
+      // }) {
+      //   return new Intl.NumberFormat(locale, {
+      //     style,
+      //     currency,
+      //     currencyDisplay: "code",
+      //     minimumFractionDigits,
+      //   }).format(value);
+      // }
+
       const date = new Date(Date.UTC(2020, 11, 20, 3, 23, 16, 738));
+      const timeZone = "Europe/Berlin";
       const locales = [
         "de",
         "de-DE",
@@ -131,7 +195,6 @@
           value: 123456789.46,
           style: "currency",
           currency,
-          currencyDisplay: "code",
         })),
         { value: 0.045, style: "percent", minimumFractionDigits: 1 },
       ];
@@ -149,11 +212,9 @@
           localeCell.innerText = locale;
           row.appendChild(localeCell);
 
-          dateStyles.forEach((dateStyle) => {
+          dateStyles.forEach((style) => {
             const cell = document.createElement("td");
-            cell.innerText = new Intl.DateTimeFormat(locale, {
-              dateStyle,
-            }).format(date);
+            cell.innerText = formatDate({ date, locale, style });
             row.appendChild(cell);
           });
 
@@ -168,12 +229,9 @@
           localeCell.innerText = locale;
           row.appendChild(localeCell);
 
-          timeStyles.forEach((timeStyle) => {
+          timeStyles.forEach((style) => {
             const cell = document.createElement("td");
-            cell.innerText = new Intl.DateTimeFormat(locale, {
-              timeStyle,
-              timeZone: 'Europe/Berlin'
-            }).format(date);
+            cell.innerText = formatTime({ date, locale, style });
             row.appendChild(cell);
           });
 
@@ -189,20 +247,15 @@
           row.appendChild(localeCell);
 
           numberStyles.forEach(
-            ({
-              value,
-              style,
-              currency,
-              minimumFractionDigits,
-              currencyDisplay,
-            }) => {
+            ({ value, style, currency, minimumFractionDigits }) => {
               const cell = document.createElement("td");
-              cell.innerText = new Intl.NumberFormat(locale, {
+              cell.innerText = formatNumber({
+                value,
+                locale,
                 style,
                 currency,
-                currencyDisplay,
                 minimumFractionDigits,
-              }).format(value);
+              });
               row.appendChild(cell);
             }
           );
